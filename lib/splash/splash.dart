@@ -1,5 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:rydex/assistants/assistant_methods.dart';
 import 'package:rydex/core/reusable_text.dart';
+import 'package:rydex/global/global.dart';
+import 'package:rydex/screens/login_screen.dart';
+import 'package:rydex/screens/main_screen.dart';
 import 'package:rydex/screens/register_page.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -27,12 +33,30 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
   Future<void> redirect() async {
-    await Future.delayed(Duration(seconds: 3));
-    Navigator.pushReplacement(
+    Timer(Duration(seconds: 10), () async {
+      if(await firebaseAuth.currentUser != null ) {
+        firebaseAuth.currentUser != null ? AssistantMethods.readCurrentOnlineUserInfo(): null;
+        Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (BuildContext context) => RegisterScreen(),
+        builder: (BuildContext context) => MainScreen(),
       ),
     );
+      } else {
+        Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (BuildContext context) => LoginScreen(),
+      ),
+    );
+      }
+    });
+    // await Future.delayed(Duration(seconds: 3));
+    // Navigator.pushReplacement(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (BuildContext context) => RegisterScreen(),
+    //   ),
+    // );
   }
 }

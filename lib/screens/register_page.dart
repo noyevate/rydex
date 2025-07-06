@@ -305,6 +305,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   title: "Register",
                                   style: TextStyle(fontSize: 15)),
                             ),
+                            20.h,
                             GestureDetector(
                               onTap: () {
                                 Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
@@ -328,7 +329,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   ),
                                 ],
                               ),
-                            )
+                            ),
+                            20.h
                           ],
                         ),
                       ),

@@ -7,6 +7,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:rydex/global/global.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:rydex/screens/main_screen.dart';
+import 'package:rydex/screens/register_page.dart';
 
 
 
@@ -174,27 +175,32 @@ class _LoginScreenState extends State<LoginScreen> {
                                 _submit();
                               },
                               child: ReuseableText(
-                                  title: "Register",
+                                  title: "Login",
                                   style: TextStyle(fontSize: 15)),
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                ReuseableText(
-                                  title: "don\'t have an account?",
-                                  style: TextStyle(
-                                      color: Colors.grey, fontSize: 15),
-                                ),
-                                10.s,
-                                ReuseableText(
-                                  title: "Sign up",
-                                  style: TextStyle(
-                                      color: darkTheme
-                                          ? Colors.amber.shade400
-                                          : Colors.lightBlue,
-                                      fontSize: 15),
-                                ),
-                              ],
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => RegisterScreen()));
+                              },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  ReuseableText(
+                                    title: "don\'t have an account?",
+                                    style: TextStyle(
+                                        color: Colors.grey, fontSize: 15),
+                                  ),
+                                  10.s,
+                                  ReuseableText(
+                                    title: "Sign up",
+                                    style: TextStyle(
+                                        color: darkTheme
+                                            ? Colors.amber.shade400
+                                            : Colors.lightBlue,
+                                        fontSize: 15),
+                                  ),
+                                ],
+                              ),
                             )
                           ],
                         ),
