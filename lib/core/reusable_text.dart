@@ -6,13 +6,14 @@ class ReuseableText extends StatelessWidget {
   final TextAlign? textAlign;
   final TextOverflow? overflow;
   final TextDecoration? decoration;
+  final bool? softWrap;
 
   const ReuseableText({
     super.key,
     required this.title,
     required this.style,
     this.textAlign,
-    this.overflow, this.decoration,
+    this.overflow, this.decoration, this.softWrap
     
   });
 
@@ -27,7 +28,7 @@ class ReuseableText extends StatelessWidget {
       textAlign: textAlign ?? TextAlign.left,
       
       overflow: overflow ?? TextOverflow.ellipsis,
-      // softWrap: false,
+      softWrap: softWrap ?? false,
     );
   }
 }
