@@ -1,6 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:rydex/screens/login_screen.dart';
 
 import 'package:rydex/splash/splash.dart';
 import 'package:rydex/theme_provider/theme_provider.dart';
@@ -23,7 +22,7 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.system,
       theme: myThemes.lightTheme,
       darkTheme: myThemes.darkTheme,
-      home:  LoginScreen(),
+      home:  SplashScreen(),
     );
   }
 }

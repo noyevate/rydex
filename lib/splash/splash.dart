@@ -6,7 +6,6 @@ import 'package:rydex/core/reusable_text.dart';
 import 'package:rydex/global/global.dart';
 import 'package:rydex/screens/login_screen.dart';
 import 'package:rydex/screens/main_screen.dart';
-import 'package:rydex/screens/register_page.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

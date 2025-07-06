@@ -45,7 +45,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             "phone": phoneTextEditingController.text.trim(),
           };
 
-          DatabaseReference userRef = FirebaseDatabase.instance.ref().child('trippo-users');
+          DatabaseReference userRef = FirebaseDatabase.instance.ref().child('rydex-users');
           userRef.child(currentUser!.uid).set(userMap);
         }
 
