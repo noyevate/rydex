@@ -6,20 +6,19 @@ import 'package:rydex/core/space_exs.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:rydex/global/global.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:rydex/screens/forgot_password.dart';
 import 'package:rydex/screens/main_screen.dart';
 import 'package:rydex/screens/register_page.dart';
 
 
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class ForgotPassword extends StatefulWidget {
+  const ForgotPassword({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<ForgotPassword> createState() => _ForgotPasswordState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _ForgotPasswordState extends State<ForgotPassword> {
   final emailTextEditingController = TextEditingController();
   final passwordTextEditingController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -28,17 +27,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _submit() async {
     if (_formKey.currentState!.validate()) {
-      await firebaseAuth.signInWithEmailAndPassword(
+      await firebaseAuth.sendPasswordResetEmail(
         email: emailTextEditingController.text.trim(),
-        password: passwordTextEditingController.text.trim() 
-      ).then((auth) async {
-        currentUser = auth.user;
+      ).then((value) async {
         
-
-        await Fluttertoast.showToast(msg: "successfully logged in");
-        Navigator.push(context, MaterialPageRoute(builder: (context) => MainScreen()));
-      }).catchError((errorMessage) {
-        Fluttertoast.showToast(msg: "error occured: \n $errorMessage");
+        await Fluttertoast.showToast(msg: "Rydex have sent an email to your mail");
+      }).onError((error, StackTrace) {
+        Fluttertoast.showToast(msg: "error occured: \n ${error.toString()}");
       });
     } else {
       Fluttertoast.showToast(msg: "not all fields are valid");
@@ -64,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     : "assets/images/city.png"),
                 20.h,
                 ReuseableText(
-                  title: "Register",
+                  title: "Forgot Password",
                   style: TextStyle(
                       color:
                           darkTheme ? Colors.amber.shade400 : Colors.lightBlue,
@@ -115,51 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             10.h,
                             
                             
-                            10.h,
-                            custom_form(
-                              obscureText: !_passwordVisible,
-                              suffixIcon: IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _passwordVisible = !_passwordVisible;
-                                  });
-                                },
-                                icon: Icon(
-                                  _passwordVisible
-                                      ? Icons.visibility
-                                      : Icons.visibility_off,
-                                  color: darkTheme
-                                      ? Colors.amber.shade400
-                                      : Colors.grey,
-                                ),
-                              ),
-                              darkTheme: darkTheme,
-                              hintText: 'confirm passsword',
-                              prefixIcon: Icon(
-                                Icons.password,
-                                color: darkTheme
-                                    ? Colors.amber.shade400
-                                    : Colors.grey,
-                              ),
-                              validator: (text) {
-                                if (text == null || text.isEmpty) {
-                                  return "password can\'t be empty";
-                                }
-                                if (text.length < 6) {
-                                  return "Please enter a valid password";
-                                }
-
-                                if (text.length > 100) {
-                                  return "password can\'t be more than 100 characters";
-                                }
-                                return null;
-                              },
-                              onChanged: (text) => setState(() {
-                                passwordTextEditingController.text = text;
-                              }),
-                            ),
-                            10.h,
-                            
+                                              
                             20.h,
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
@@ -176,46 +127,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                 _submit();
                               },
                               child: ReuseableText(
-                                  title: "Login",
+                                  title: "Reset Password",
                                   style: TextStyle(fontSize: 15)),
                             ),
-                            20.h,
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => ForgotPassword()));
-                              },
-                              child: ReuseableText(
-                                title: "Forgot password",
-                                style: TextStyle(
-                                    color:  darkTheme
-                                  ? Colors.grey: Colors.lightBlue, fontSize: 15),
-                              ),
-                            ),
-                            20.h,
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => RegisterScreen()));
-                              },
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  ReuseableText(
-                                    title: "don\'t have an account?",
-                                    style: TextStyle(
-                                        color: Colors.grey, fontSize: 15),
-                                  ),
-                                  10.s,
-                                  ReuseableText(
-                                    title: "Sign up",
-                                    style: TextStyle(
-                                        color: darkTheme
-                                            ? Colors.amber.shade400
-                                            : Colors.lightBlue,
-                                        fontSize: 15),
-                                  ),
-                                ],
-                              ),
-                            )
+                            
                           ],
                         ),
                       ),
