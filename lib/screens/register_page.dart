@@ -51,7 +51,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
         await Fluttertoast.showToast(msg: "successfully registered");
         Navigator.push(context, MaterialPageRoute(builder: (context) => MainScreen()));
+      }).catchError((errorMessage) {
+        Fluttertoast.showToast(msg: "error occured: \n $errorMessage");
       });
+    } else {
+      Fluttertoast.showToast(msg: "not all fields are valid");
     }
   }
 

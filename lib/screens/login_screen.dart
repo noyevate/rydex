@@ -26,16 +26,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _submit() async {
     if (_formKey.currentState!.validate()) {
-      await firebaseAuth.createUserWithEmailAndPassword(
+      await firebaseAuth.signInWithEmailAndPassword(
         email: emailTextEditingController.text.trim(),
         password: passwordTextEditingController.text.trim() 
       ).then((auth) async {
         currentUser = auth.user;
         
 
-        await Fluttertoast.showToast(msg: "successfully registered");
+        await Fluttertoast.showToast(msg: "successfully logged in");
         Navigator.push(context, MaterialPageRoute(builder: (context) => MainScreen()));
+      }).catchError((errorMessage) {
+        Fluttertoast.showToast(msg: "error occured: \n $errorMessage");
       });
+    } else {
+      Fluttertoast.showToast(msg: "not all fields are valid");
     }
   }
 
