@@ -1,3 +1,5 @@
+// ignore_for_file: unused_field
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -5,9 +7,14 @@ import 'package:geocoder2/geocoder2.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location/location.dart' as loc;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:rydex/assistants/assistant_methods.dart';
 import 'package:rydex/core/reusable_text.dart';
 import 'package:rydex/core/space_exs.dart';
+import 'package:rydex/global/global.dart';
+import 'package:rydex/info_handler/app_info.dart';
+import 'package:rydex/models/directions.dart';
+import 'package:rydex/screens/search_places_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -29,7 +36,6 @@ class _MainScreenState extends State<MainScreen> {
   static const CameraPosition _kGooglePlex = CameraPosition(
       target: LatLng(37.42796133580664, -122.085749655962), zoom: 15);
 
-  // ignore: unused_field
   GlobalKey<ScaffoldState> _ScaffoldState = GlobalKey<ScaffoldState>();
 
   double searchLocationContainerHeight = 300;
@@ -76,6 +82,15 @@ class _MainScreenState extends State<MainScreen> {
         await AssistantMethods.searchAddressForGeographicCordinates(
             userCurrentPosition!, context);
     print("address: $humanReadableAddress");
+
+    username = UserModelCurrentInfo?.name ?? "";
+    userEmail = UserModelCurrentInfo?.email ?? "";
+    print(username);
+    print(userEmail);
+
+    // initializeGeoFireListener();
+
+    // AssistantMethods.readTripsKeyForOnlineUser(context);
   }
 
   // Future<void> locateUserPosition() async {
@@ -162,7 +177,11 @@ class _MainScreenState extends State<MainScreen> {
           longitude: pick_Location!.longitude,
           googleMapApiKey: apiKey);
       setState(() {
-        _address = data.address;
+        Directions userPickupddress = Directions();
+        userPickupddress.locationLatitude = pick_Location!.latitude;
+        userPickupddress.locationLongitude = pick_Location!.longitude;
+        userPickupddress.locationName = data.address;
+        // _address = data.address;
       });
     } catch (e) {
       print(e);
@@ -215,6 +234,8 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    bool darkTheme =
+        MediaQuery.of(context).platformBrightness == Brightness.dark;
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -259,25 +280,187 @@ class _MainScreenState extends State<MainScreen> {
                 ),
               ),
             ),
+
             Positioned(
-              top: 40,
-              right: 20,
-              left: 20,
-              child: Container(
-                padding: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black),
-                    color: Colors.white),
-                child: Center(
-                  child: ReuseableText(
-                    title: _address ?? "set your pick up location",
-                    style: TextStyle(),
-                    overflow: TextOverflow.visible,
-                    softWrap: true,
-                  ),
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(20, 50, 20, 20),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                          color: darkTheme ? Colors.black : Colors.white,
+                          borderRadius: BorderRadius.circular(10)),
+                      child: Column(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                                color: darkTheme
+                                    ? Colors.grey.shade900
+                                    : Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(10)),
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.all(5),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.location_on_outlined,
+                                        color: darkTheme
+                                            ? Colors.amber.shade400
+                                            : Colors.lightBlue,
+                                      ),
+                                      15.h,
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          ReuseableText(
+                                            title: "From",
+                                            style: TextStyle(
+                                                color: darkTheme
+                                                    ? Colors.amber.shade400
+                                                    : Colors.lightBlue,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          ReuseableText(
+                                            title: Provider.of<AppInfo>(context)
+                                                        .userPickupLocation !=
+                                                    null
+                                                ? (Provider.of<AppInfo>(context)
+                                                            .userPickupLocation!
+                                                            .locationName!)
+                                                        .substring(0, 30) +
+                                                    '...'
+                                                : "getting address",
+                                            style: TextStyle(
+                                                color: Colors.grey,
+                                                fontSize: 12),
+                                            overflow: TextOverflow.visible,
+                                            softWrap: true,
+                                          )
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                5.h,
+                                Divider(
+                                  height: 1,
+                                  thickness: 2,
+                                  color: darkTheme
+                                      ? Colors.amber.shade400
+                                      : Colors.lightBlue,
+                                ),
+                                5.h,
+                                GestureDetector(
+                                  onTap: () async {
+                                    var resonseFromSearchScreen =
+                                        await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            SearchPlacesScreen(),
+                                      ),
+                                    );
+
+                                    if (resonseFromSearchScreen ==
+                                        "obtainedDropOff") {
+                                      setState(() {
+                                        openNavgationDrawer = false;
+                                      });
+                                    }
+
+                                    // await drawPolyLins
+                                  },
+                                  child: Padding(
+                                    padding: EdgeInsets.all(5),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.location_on_outlined,
+                                          color: darkTheme
+                                              ? Colors.amber.shade400
+                                              : Colors.lightBlue,
+                                        ),
+                                        15.h,
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            ReuseableText(
+                                              title: "To",
+                                              style: TextStyle(
+                                                  color: darkTheme
+                                                      ? Colors.amber.shade400
+                                                      : Colors.lightBlue,
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            ReuseableText(
+                                              title: Provider.of<AppInfo>(
+                                                              context)
+                                                          .userDropOffLocation !=
+                                                      null
+                                                  ? Provider.of<AppInfo>(
+                                                          context)
+                                                      .userDropOffLocation!
+                                                      .locationName!
+                                                  : "where to?",
+                                              style: TextStyle(
+                                                  color: Colors.grey,
+                                                  fontSize: 12),
+                                              overflow: TextOverflow.visible,
+                                              softWrap: true,
+                                            )
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    )
+                  ],
                 ),
               ),
             )
+
+            // Positioned(
+            //   top: 40,
+            //   right: 20,
+            //   left: 20,
+            //   child: Container(
+            //     padding: EdgeInsets.all(10),
+            //     decoration: BoxDecoration(
+            //         border: Border.all(color: Colors.black),
+            //         color: Colors.white),
+            //     child: Center(
+            //       child: ReuseableText(
+            //         title:
+            //             Provider.of<AppInfo>(context).userPickupLocation != null
+            //                 ? (Provider.of<AppInfo>(context)
+            //                             .userPickupLocation!
+            //                             .locationName!)
+            //                         .substring(0, 50) +
+            //                     '...'
+            //                 : "set your pick up location",
+            //         style: TextStyle(color: Colors.black),
+            //         overflow: TextOverflow.visible,
+            //         softWrap: true,
+            //       ),
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),

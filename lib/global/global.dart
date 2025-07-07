@@ -5,3 +5,5 @@ final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 User? currentUser;
 
 UserModel? UserModelCurrentInfo;
+
+String UserDropOffAddress = "";

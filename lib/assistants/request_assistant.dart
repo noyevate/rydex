@@ -8,6 +8,8 @@ class RequestAssistant {
 
         try{
             if(httpResponse.statusCode == 200) {
+              print("statuscode: ${httpResponse.statusCode}");
+              print("body: ${httpResponse.body}");
                 String responseData = httpResponse.body;
                 var decodedResponseData = jsonDecode(responseData);
                 return decodedResponseData;
