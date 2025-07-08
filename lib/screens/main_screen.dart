@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geocoder2/geocoder2.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location/location.dart' as loc;
@@ -15,6 +16,7 @@ import 'package:rydex/global/global.dart';
 import 'package:rydex/info_handler/app_info.dart';
 import 'package:rydex/models/directions.dart';
 import 'package:rydex/screens/search_places_screen.dart';
+import 'package:rydex/widget/progress_dialog.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -93,82 +95,112 @@ class _MainScreenState extends State<MainScreen> {
     // AssistantMethods.readTripsKeyForOnlineUser(context);
   }
 
-  // Future<void> locateUserPosition() async {
-  //   // 1. Check if location services are enabled on the device
-  //   bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  //   if (!serviceEnabled) {
-  //     print('Location services are disabled.');
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text('Location services are disabled. Please enable them.')),
-  //     );
-  //     // Optionally, you might want to open location settings:
-  //     // await Geolocator.openLocationSettings();
-  //     return; // Stop execution if services are disabled
-  //   }
+  Future<void> drawPolyLinesFromOriginToDestination(bool darkTheme) async{
+    var originPostion = Provider.of<AppInfo>(context, listen: false).userPickupLocation;
+    var destinationPosition = Provider.of<AppInfo>(context, listen: false).userDropOffLocation;
+    var originLatLng = LatLng(originPostion!.locationLatitude!, originPostion.locationLongitude!);
+    var destinationLatLng = LatLng(destinationPosition!.locationLatitude!, destinationPosition.locationLongitude!);
 
-  //   // 2. Check current permission status
-  //   LocationPermission permission = await Geolocator.checkPermission();
+    showDialog(
+      context: context, 
+      builder: (BuildContext context) => ProgressDialog(message: "please wait...",)
+    );
 
-  //   if (permission == LocationPermission.denied) {
-  //     // Permissions are denied, request them.
-  //     permission = await Geolocator.requestPermission();
-  //     if (permission == LocationPermission.denied) {
-  //       // Permissions are still denied after requesting.
-  //       print('Location permissions are denied (after request).');
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Location permission denied. Please grant permission in app settings.')),
-  //       );
-  //       return; // Stop execution if permissions are denied
-  //     }
-  //   }
+    var directionDetailsInfo = await AssistantMethods.obtainOriginToDestinationDirectionDetails(originLatLng, destinationLatLng);
 
-  //   if (permission == LocationPermission.deniedForever) {
-  //     // Permissions are permanently denied.
-  //     print('Location permissions are permanently denied, we cannot request permissions.');
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(
-  //         content: Text('Location permission permanently denied. Please enable it in app settings.'),
-  //         action: SnackBarAction(
-  //           label: 'Settings',
-  //           onPressed: () async {
-  //             // await openAppSettings(); // From permission_handler package
-  //           },
-  //         ),
-  //       ),
-  //     );
-  //     return; // Stop execution if permissions are permanently denied
-  //   }
+    setState(() {
+      tripDirectionDetailsInfo = directionDetailsInfo; 
+    });
 
-  //   // 3. If permissions are granted (or were already granted)
-  //   if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
-  //     print('Location permissions granted. Attempting to get position...');
-  //     try {
-  //       Position cPosition = await Geolocator.getCurrentPosition(
-  //         desiredAccuracy: LocationAccuracy.high,
-  //       );
-  //       userCurrentPosition = cPosition; // Assign to your class member
+    Navigator.pop(context);
+    
+    PolylinePoints pPoints = PolylinePoints();
 
-  //       LatLng latLngPosition = LatLng(userCurrentPosition!.latitude, userCurrentPosition!.longitude);
-  //       CameraPosition cameraPosition = CameraPosition(target: latLngPosition, zoom: 15);
+    List<PointLatLng> decodePolyLinePointsResultList = pPoints.decodePolyline(directionDetailsInfo.e_points!);
 
-  //       // Ensure newGoogleapController is not null before using it
-  //       if (newGoogleapController != null) {
-  //         newGoogleapController!.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
-  //       } else {
-  //         print('Error: Google Map controller is null.');
-  //       }
+    pLineCoordinatedList.clear();
 
-  //       String humanReadableAddress = await AssistantMethods.searchAddressForGeographicCordinates(userCurrentPosition!, context);
-  //       print("address: $humanReadableAddress");
+    if(decodePolyLinePointsResultList.isNotEmpty) {
+      decodePolyLinePointsResultList.forEach((PointLatLng pointLatLng) {
+        pLineCoordinatedList.add(LatLng(pointLatLng.latitude, pointLatLng.longitude));
+      });
+    }
 
-  //     } catch (e) {
-  //       print("Error getting location: $e");
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Error getting location: ${e.toString()}')),
-  //       );
-  //     }
-  //   }
-  // }
+    polylineSet.clear();
+
+    setState(() {
+      Polyline polyline = Polyline(
+        color: darkTheme ? Colors.amberAccent : Colors.lightBlueAccent,
+        polylineId: PolylineId("polyLineId"),
+        jointType: JointType.round,
+        points: pLineCoordinatedList,
+        startCap: Cap.roundCap,
+        endCap: Cap.roundCap,
+        width: 5,
+
+      );
+      polylineSet.add(polyline);
+    });
+
+    LatLngBounds boundsLatLng;
+
+    if(originLatLng.latitude > destinationLatLng.latitude && originLatLng.longitude > destinationLatLng.longitude) {
+      boundsLatLng = LatLngBounds(southwest: destinationLatLng, northeast: originLatLng);
+    } else if(originLatLng.longitude > destinationLatLng.longitude) {
+      boundsLatLng = LatLngBounds(southwest: LatLng(originLatLng.latitude, destinationLatLng.longitude), northeast: LatLng(destinationLatLng.latitude, originLatLng.longitude));
+    } else if(originLatLng.latitude > destinationLatLng.latitude) {
+      boundsLatLng = LatLngBounds(southwest: LatLng(destinationLatLng.latitude, originLatLng.longitude), northeast: LatLng(originLatLng.latitude, destinationLatLng.longitude));
+    } else {
+      boundsLatLng = LatLngBounds(southwest: originLatLng, northeast: destinationLatLng);
+    }
+
+    newGoogleapController!.animateCamera(CameraUpdate.newLatLngBounds(boundsLatLng, 50));
+
+    Marker originMarker = Marker(
+      markerId: MarkerId("originId"),
+      infoWindow: InfoWindow(title: originPostion.locationName, snippet: "Origin"),
+      position: originLatLng,
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen)
+    );
+
+    Marker destinationMarker = Marker(
+      markerId: MarkerId("destinationID"),
+      infoWindow: InfoWindow(title: destinationPosition.locationName, snippet: "Destination"),
+      position: destinationLatLng,
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange)
+    );
+
+    setState(() {
+      markersSet.add(originMarker);
+      markersSet.add(destinationMarker);
+    });
+
+
+    Circle originCircle = Circle(
+      circleId: CircleId("Origin"),
+      fillColor: Colors.lightGreenAccent,
+      radius: 10,
+      strokeWidth: 3,
+      strokeColor: Colors.white,
+      center: originLatLng
+    );
+
+
+    Circle destinationCircle = Circle(
+      circleId: CircleId("Destination"),
+      fillColor: Colors.orangeAccent,
+      radius: 10,
+      strokeWidth: 3,
+      strokeColor: Colors.white,
+      center: destinationLatLng
+    );
+
+    setState(() {
+      circlesSet.add(originCircle);
+      circlesSet.add(destinationCircle);
+    });
+
+  }
 
   getAddressFromLatLng() async {
     try {
@@ -376,7 +408,7 @@ class _MainScreenState extends State<MainScreen> {
                                       });
                                     }
 
-                                    // await drawPolyLins
+                                    await drawPolyLinesFromOriginToDestination(darkTheme);
                                   },
                                   child: Padding(
                                     padding: EdgeInsets.all(5),
@@ -415,8 +447,8 @@ class _MainScreenState extends State<MainScreen> {
                                               style: TextStyle(
                                                   color: Colors.grey,
                                                   fontSize: 12),
-                                              overflow: TextOverflow.visible,
-                                              softWrap: true,
+                                              overflow: TextOverflow.ellipsis,
+                                              // softWrap: true,
                                             )
                                           ],
                                         )
