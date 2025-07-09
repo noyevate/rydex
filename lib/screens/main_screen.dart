@@ -15,6 +15,8 @@ import 'package:rydex/core/space_exs.dart';
 import 'package:rydex/global/global.dart';
 import 'package:rydex/info_handler/app_info.dart';
 import 'package:rydex/models/directions.dart';
+import 'package:rydex/screens/drawer_screen.dart';
+import 'package:rydex/screens/precise_pickup_location_screen.dart';
 import 'package:rydex/screens/search_places_screen.dart';
 import 'package:rydex/widget/progress_dialog.dart';
 
@@ -36,7 +38,7 @@ class _MainScreenState extends State<MainScreen> {
   GoogleMapController? newGoogleapController;
 
   static const CameraPosition _kGooglePlex = CameraPosition(
-      target: LatLng(37.42796133580664, -122.085749655962), zoom: 15);
+      target: LatLng(8.4945477, 4.5910293), zoom: 15);
 
   GlobalKey<ScaffoldState> _ScaffoldState = GlobalKey<ScaffoldState>();
 
@@ -202,23 +204,23 @@ class _MainScreenState extends State<MainScreen> {
 
   }
 
-  getAddressFromLatLng() async {
-    try {
-      GeoData data = await Geocoder2.getDataFromCoordinates(
-          latitude: pick_Location!.latitude,
-          longitude: pick_Location!.longitude,
-          googleMapApiKey: apiKey);
-      setState(() {
-        Directions userPickupddress = Directions();
-        userPickupddress.locationLatitude = pick_Location!.latitude;
-        userPickupddress.locationLongitude = pick_Location!.longitude;
-        userPickupddress.locationName = data.address;
-        // _address = data.address;
-      });
-    } catch (e) {
-      print(e);
-    }
-  }
+  // getAddressFromLatLng() async {
+  //   try {
+  //     GeoData data = await Geocoder2.getDataFromCoordinates(
+  //         latitude: pick_Location!.latitude,
+  //         longitude: pick_Location!.longitude,
+  //         googleMapApiKey: apiKey);
+  //     setState(() {
+  //       Directions userPickupddress = Directions();
+  //       userPickupddress.locationLatitude = pick_Location!.latitude;
+  //       userPickupddress.locationLongitude = pick_Location!.longitude;
+  //       userPickupddress.locationName = data.address;
+  //       // _address = data.address;
+  //     });
+  //   } catch (e) {
+  //     print(e);
+  //   }
+  // }
 
   checkIfLocationPermissionAllowed() async {
     _locationPermission = await Geolocator.requestPermission();
@@ -273,6 +275,8 @@ class _MainScreenState extends State<MainScreen> {
         FocusScope.of(context).unfocus();
       },
       child: Scaffold(
+        key: _ScaffoldState,
+        drawer: DrawerScreen(),
         body: Stack(
           children: [
             GoogleMap(
@@ -291,24 +295,42 @@ class _MainScreenState extends State<MainScreen> {
                 setState(() {});
                 locateUserPosition();
               },
-              onCameraMove: (CameraPosition? position) {
-                if (pick_Location != position!.target) {
-                  setState(() {
-                    pick_Location = position.target;
-                  });
-                }
-              },
-              onCameraIdle: () {
-                getAddressFromLatLng();
-              },
+              // onCameraMove: (CameraPosition? position) {
+              //   if (pick_Location != position!.target) {
+              //     setState(() {
+              //       pick_Location = position.target;
+              //     });
+              //   }
+              // },
+              // onCameraIdle: () {
+              //   getAddressFromLatLng();
+              // },
             ),
-            Align(
-              alignment: Alignment.center,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 30),
-                child: Image.asset(
-                  "assets/images/pickup.png",
-                  scale: 15,
+            // Align(
+            //   alignment: Alignment.center,
+            //   child: Padding(
+            //     padding: const EdgeInsets.only(bottom: 30),
+            //     child: Image.asset(
+            //       "assets/images/pickup.png",
+            //       scale: 15,
+            //     ),
+            //   ),
+            // ),
+            Positioned(
+              top: 50,
+              left: 20,
+              child: GestureDetector(
+                onTap: () {
+                  _ScaffoldState.currentState!.openDrawer();
+                },
+                child: Container(
+                  child: CircleAvatar(
+                    backgroundColor: darkTheme ? Colors.amber.shade400 : Colors.white,
+                    child: Icon(
+                      Icons.menu,
+                      color: darkTheme ? Colors.black : Colors.lightBlue,
+                    ),
+                  )
                 ),
               ),
             ),
@@ -461,6 +483,38 @@ class _MainScreenState extends State<MainScreen> {
                           )
                         ],
                       ),
+                    ),
+
+                    5.h,
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: MaterialButton(
+                            onPressed: () {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => PrecisePickupLocationScreen(),),);
+                            },
+                            child: ReuseableText(title: "Change pickup", style: TextStyle(
+                              color: darkTheme ? Colors.black : Colors.white, fontSize: 12, fontWeight: FontWeight.bold
+                            ),),
+                            color: darkTheme ?Colors.amber.shade400 : Colors.lightBlue,
+                            // textTheme: ,
+                          ),
+                        ), 
+                        5.s,
+                        Expanded(
+                          child: MaterialButton(
+                            onPressed: () {},
+                            child: ReuseableText(title: "request a ride", style: TextStyle(
+                              color: darkTheme ? Colors.black : Colors.white, fontSize: 12, fontWeight: FontWeight.bold
+                            ),),
+                            color: darkTheme ?Colors.amber.shade400 : Colors.lightBlue,
+                            // textTheme: ,
+                          ),
+                        ), 
+
+                      ],
                     )
                   ],
                 ),
